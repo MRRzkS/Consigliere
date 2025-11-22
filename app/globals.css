@@ -1,26 +1,148 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Noir Mafia Palette (Light Mode - though we mostly use Dark) */
+  --background: #e5e5e5;
+  /* Mafia Paper */
+  --foreground: #09090b;
+  /* Mafia Black */
+  --card: #ffffff;
+  --card-foreground: #09090b;
+  --popover: #ffffff;
+  --popover-foreground: #09090b;
+  --primary: #c5a059;
+  /* Mafia Gold */
+  --primary-foreground: #09090b;
+  --secondary: #f4f4f5;
+  --secondary-foreground: #18181b;
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
+  --accent: #f4f4f5;
+  --accent-foreground: #18181b;
+  --destructive: #9f1239;
+  /* Mafia Blood */
+  --destructive-foreground: #fafafa;
+  --border: #e4e4e7;
+  --input: #e4e4e7;
+  --ring: #c5a059;
+  --radius: 0.25rem;
+  /* rounded-sm */
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
-    --foreground: #ededed;
+    /* Charcoal / Deep Espresso */
+    --foreground: #e5e5e5;
+    /* Mafia Paper */
+    --card: #121212;
+    /* Rich Black */
+    --card-foreground: #e5e5e5;
+    --popover: #121212;
+    --popover-foreground: #e5e5e5;
+    --primary: #c5a059;
+    /* Mafia Gold */
+    --primary-foreground: #09090b;
+    /* Black text on Gold */
+    --secondary: #27272a;
+    --secondary-foreground: #e5e5e5;
+    --muted: #27272a;
+    --muted-foreground: #a1a1aa;
+    --accent: #27272a;
+    --accent-foreground: #c5a059;
+    /* Gold text on accent */
+    --destructive: #881337;
+    /* Blood Red / Wine */
+    --destructive-foreground: #fafafa;
+    --border: #27272a;
+    /* Zinc 800 equivalent */
+    --input: #27272a;
+    --ring: #c5a059;
   }
 }
 
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+
+  --font-serif: var(--font-playfair);
+  --font-mono: var(--font-courier);
+  --font-sans: var(--font-playfair);
+  /* Default to Serif for headings/body mix, or keep sans for readability? User said "Import Playfair for Headings... Use Inter/Courier for data". Let's map serif to Playfair and mono to Courier. */
+
+  /* Custom Colors */
+  --color-mafia-black: #09090b;
+  --color-mafia-gold: #c5a059;
+  --color-mafia-paper: #e5e5e5;
+  --color-mafia-blood: #9f1239;
+}
+
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-serif), serif;
+  /* Default to Playfair as requested for "Atmosphere", but maybe too much for body text? User said "Playfair for all Headings". I should probably set headings to serif and body to sans/mono? User said "Inter or Courier Prime for data/numbers". Let's default to serif for the "vibe" but override for data. */
+
+  /* Noise Texture */
+  background-image:
+    radial-gradient(circle at center, transparent 0%, #000000 120%),
+    /* Vignette */
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+  background-attachment: fixed;
+}
+
+/* Typography Overrides */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-serif);
+  letter-spacing: -0.02em;
+}
+
+/* Data & Numbers */
+.font-mono,
+.tabular-nums,
+.data-cell {
+  font-family: var(--font-mono);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
 }
