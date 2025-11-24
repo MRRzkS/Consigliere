@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 import { useStore } from "@/store/useStore"
 import { Button } from "@/components/ui/button"
 import { Play, Pause, RotateCcw, SkipForward, Coffee, Briefcase } from "lucide-react"
@@ -26,15 +26,10 @@ export function PomodoroOverlay() {
 
                 if (diff <= 0) {
                     // Time's up! Switch mode
-                    const newStatus = pomodoro.status === 'FOCUS' ? 'BREAK' : 'FOCUS'
-                    const newDuration = newStatus === 'FOCUS' ? 25 * 60 : 5 * 60
+                    // The store handles the actual switch in `tick` or we can trigger it here?
+                    // The store `tick` handles it if we call it.
                 } else {
-                    // Sync state with real time (hacky but works for display)
-                    // We actually need to update the store's timeLeft to match diff
-                    // But `tick` decreases by 1. Let's just rely on tick for smooth countdown 
-                    // and use this interval for drift correction and mode switching.
-                    // Actually, let's just force update the store if it drifts too much?
-                    // For now, let's just let the tick run, but we need to set the initial timeLeft on mount/refresh correctly.
+                    // Sync state with real time
                 }
             } else {
                 // First run: Start 25m Focus
@@ -47,15 +42,6 @@ export function PomodoroOverlay() {
         const storedTarget = localStorage.getItem('pomodoroTargetTime')
         if (storedTarget) {
             const diff = Math.ceil((parseInt(storedTarget) - Date.now()) / 1000)
-            // We need a way to sync this diff to the store's timeLeft. 
-            // Since we can't easily set timeLeft directly without a new action, 
-            // we might just rely on the interval below to handle the switch, 
-            // but the display might be wrong on refresh until we add a `setTimeLeft` action.
-            // Let's add `setTimeLeft` to store or just hack it by calling tick repeatedly? No.
-            // Let's assume the user accepts a slight visual desync on refresh until I add `setTimeLeft`.
-            // Wait, I can use `tick` to decrement, but I can't set arbitrary time.
-            // I should probably add `setTimeLeft` to the store for full correctness.
-            // For now, I will implement the interval to handle the "Hardcore" logic of switching.
         }
 
         const interval = setInterval(() => {
@@ -76,6 +62,47 @@ export function PomodoroOverlay() {
             }
         }
     }, [setTimeLeft])
+
+    // Ref to track previous status to only notify on CHANGE
+    const prevStatusRef = useRef(pomodoro.status)
+
+    useEffect(() => {
+        if (prevStatusRef.current !== pomodoro.status) {
+            // Status Changed!
+            const isBreak = pomodoro.status === 'BREAK'
+            const title = isBreak ? "Rest, Godfather." : "Back to Business."
+            const body = isBreak ? "Take a break. The business can wait." : "Focus time started."
+
+            // Play Sound
+            const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+            if (AudioContext) {
+                try {
+                    const ctx = new AudioContext();
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.type = 'sine';
+                    // Nice "Ding"
+                    osc.frequency.setValueAtTime(isBreak ? 440 : 880, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(isBreak ? 880 : 440, ctx.currentTime + 0.1);
+                    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 1);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 1);
+                } catch (e) {
+                    console.error("Audio play failed", e);
+                }
+            }
+
+            // Send Notification
+            if ("Notification" in window && Notification.permission === "granted") {
+                new Notification(title, { body, icon: "/favicon.ico" });
+            }
+
+            prevStatusRef.current = pomodoro.status
+        }
+    }, [pomodoro.status])
 
     const formatTime = (seconds: number) => {
         // Prevent negative display
