@@ -195,7 +195,7 @@ function StatCard({ title, value, icon: Icon, trend, data, color }: any) {
         <p className="text-xs text-muted-foreground mt-1">{trend}</p>
       </CardContent>
       <div className="absolute bottom-0 left-0 right-0 h-16 opacity-20 pointer-events-none">
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
           <LineChart data={data}>
             <Line type="monotone" dataKey="value" stroke={color} strokeWidth={2} dot={false} />
           </LineChart>
